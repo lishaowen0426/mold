@@ -54,6 +54,11 @@ namespace mold
 
     bool in_lib = rctx.in_lib || (!archive_name.empty() && !rctx.whole_archive);
 
+    if (rctx.isolate)
+    {
+      SPDLOG_DEBUG("{} is isolated", mf->get_identifier());
+    }
+
     ObjectFile<E> *file = new ObjectFile<E>(ctx, mf, archive_name, in_lib, rctx.isolate);
     ctx.obj_pool.emplace_back(file);
     file->priority = ctx.file_priority++;
@@ -256,11 +261,6 @@ namespace mold
     tbb::task_group tg;
     rctx.tg = &tg;
 
-    auto reset_isolate = [&]()
-    {
-      rctx.isolate = false;
-    };
-
     while (!args.empty())
     {
       std::string_view arg = args[0];
@@ -289,6 +289,10 @@ namespace mold
       else if (arg == "--isolate")
       {
         rctx.isolate = true;
+      }
+      else if (arg == "--no-isolate")
+      {
+        rctx.isolate = false;
       }
       else if (arg == "--Bdynamic")
       {
@@ -327,7 +331,6 @@ namespace mold
       else
       {
         read_file(ctx, rctx, must_open_file(ctx, std::string(arg)));
-        reset_isolate();
       }
     }
 

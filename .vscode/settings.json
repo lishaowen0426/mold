@@ -13,7 +13,8 @@
     "**/bower_components": true,
     "**/*.code-search": true,
     "third-party": true,
-    "*.sh": true
+    "*.sh": true,
+    "deps/**": true
   },
   "files.associations": {
     "*.css": "tailwindcss",

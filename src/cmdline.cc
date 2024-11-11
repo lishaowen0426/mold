@@ -962,6 +962,10 @@ mold: supported emulations: elf_i386 elf_x86_64 armelf_linux_eabi aarch64elf aar
       {
         remaining.push_back("--isolate");
       }
+      else if (read_flag("no-isolate"))
+      {
+        remaining.push_back("--no-isolate");
+      }
       else if (read_flag("Bdynamic") || read_flag("dy"))
       {
         ctx.arg.static_ = false;
