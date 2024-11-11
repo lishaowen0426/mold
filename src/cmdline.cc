@@ -633,6 +633,11 @@ mold: supported emulations: elf_i386 elf_x86_64 armelf_linux_eabi aarch64elf aar
     std::span<std::string_view> args = ctx.cmdline_args;
     args = args.subspan(1);
 
+    for (auto a = args.begin(); a != args.end(); a++)
+    {
+      SPDLOG_DEBUG("{}", *a);
+    }
+
     std::vector<std::string> remaining;
     std::string_view arg;
 

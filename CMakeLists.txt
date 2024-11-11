@@ -87,6 +87,7 @@ endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_options(mold PRIVATE -D_GLIBCXX_ASSERTIONS)
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
@@ -309,9 +310,11 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # As a workaround, we create a .cc file for each target and spawn many
 # compiler instances. This is hacky but greatly reduces compile time
 # on a multicore machine.
+
 list(APPEND MOLD_ELF_TARGETS
   X86_64 I386 ARM64LE ARM64BE ARM32 RV32LE RV32BE RV64LE RV64BE PPC32
   PPC64V1 PPC64V2 S390X SPARC64 M68K SH4LE SH4BE LOONGARCH32 LOONGARCH64)
+
 
 list(APPEND MOLD_ELF_TEMPLATE_FILES
   src/arch-arm64.cc
@@ -412,6 +415,18 @@ else()
     lib/signal-unix.cc
     )
 endif()
+
+add_subdirectory(deps/spdlog EXCLUDE_FROM_ALL)
+target_include_directories(mold
+    PRIVATE
+    "$<TARGET_PROPERTY:spdlog,INTERFACE_INCLUDE_DIRECTORIES>"
+)
+target_link_libraries(mold PRIVATE spdlog)
+target_compile_options(mold PRIVATE -fexceptions)
+
+
+
+
 
 include(CTest)
 

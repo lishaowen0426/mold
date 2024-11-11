@@ -1,10 +1,18 @@
 {
-    "configurations": [
-        {
-            "name": "Linux",
-            "compileCommands": "${workspaceFolder}/build/compile_commands.json",
-            "compilerPath": "/usr/bin/c++"
-        }
-    ],
-    "version": 4
+  "configurations": [
+    {
+      "name": "Linux",
+      "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+      "compilerPath": "/usr/bin/c++",
+      "includePath": [
+        "${workspaceFolder}/lib",
+        "${workspaceFolder}/src",
+        "${workspaceFolder}/deps/**/include",
+        "${workspaceFolder}/build"
+      ],
+      "cppStandard": "c++20",
+      "defines": ["MOLD_TARGET=X86_64"]
+    }
+  ],
+  "version": 4
 }
