@@ -1496,6 +1496,8 @@ namespace mold
     ObjectFile(Context<E> &ctx, MappedFile *mf, std::string archive_name,
                bool is_in_lib);
 
+    ObjectFile(Context<E> &ctx, MappedFile *mf, std::string archive_name,
+               bool is_in_lib, bool isolate);
     void parse(Context<E> &ctx);
     void initialize_symbols(Context<E> &ctx);
     void parse_ehframe(Context<E> &ctx);
@@ -1529,6 +1531,7 @@ namespace mold
     bool is_lto_obj = false;
     bool is_gcc_offload_obj = false;
     bool is_rust_obj = false;
+    bool isolate = false;
 
     i64 fde_idx = 0;
     i64 fde_offset = 0;
@@ -1612,6 +1615,7 @@ namespace mold
     bool in_lib = false;
     bool static_ = false;
     bool whole_archive = false;
+    bool isolate = false;
     tbb::task_group *tg = nullptr;
   };
 

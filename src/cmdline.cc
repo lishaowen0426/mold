@@ -635,7 +635,7 @@ mold: supported emulations: elf_i386 elf_x86_64 armelf_linux_eabi aarch64elf aar
 
     for (auto a = args.begin(); a != args.end(); a++)
     {
-      SPDLOG_DEBUG("{}", *a);
+      SPDLOG_TRACE("{}", *a);
     }
 
     std::vector<std::string> remaining;
@@ -957,6 +957,10 @@ mold: supported emulations: elf_i386 elf_x86_64 armelf_linux_eabi aarch64elf aar
       {
         ctx.arg.static_ = true;
         remaining.push_back("--Bstatic");
+      }
+      else if (read_flag("isolate"))
+      {
+        remaining.push_back("--isolate");
       }
       else if (read_flag("Bdynamic") || read_flag("dy"))
       {

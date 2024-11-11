@@ -17,6 +17,9 @@
   },
   "files.associations": {
     "*.css": "tailwindcss",
+    "*.scss": "tailwindcss",
+    "*.cshtml": "html",
+    "justfile": "ignore",
     "*.s": "asm-intel-x86-generic",
     "format": "cpp",
     "string_view": "cpp",
@@ -90,6 +93,8 @@
     "thread": "cpp",
     "cfenv": "cpp",
     "cinttypes": "cpp",
-    "variant": "cpp"
+    "variant": "cpp",
+    "complex": "cpp",
+    "source_location": "cpp"
   }
 }

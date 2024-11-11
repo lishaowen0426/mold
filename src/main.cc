@@ -54,7 +54,7 @@ namespace mold
 
     bool in_lib = rctx.in_lib || (!archive_name.empty() && !rctx.whole_archive);
 
-    ObjectFile<E> *file = new ObjectFile<E>(ctx, mf, archive_name, in_lib);
+    ObjectFile<E> *file = new ObjectFile<E>(ctx, mf, archive_name, in_lib, rctx.isolate);
     ctx.obj_pool.emplace_back(file);
     file->priority = ctx.file_priority++;
 
@@ -248,7 +248,6 @@ namespace mold
   static void read_input_files(Context<E> &ctx, std::span<std::string> args)
   {
     Timer t(ctx, "read_input_files");
-    SPDLOG_DEBUG("read_input_files");
 
     ReaderContext rctx;
     std::vector<ReaderContext> stack;
@@ -256,6 +255,11 @@ namespace mold
 
     tbb::task_group tg;
     rctx.tg = &tg;
+
+    auto reset_isolate = [&]()
+    {
+      rctx.isolate = false;
+    };
 
     while (!args.empty())
     {
@@ -281,6 +285,10 @@ namespace mold
       else if (arg == "--Bstatic")
       {
         rctx.static_ = true;
+      }
+      else if (arg == "--isolate")
+      {
+        rctx.isolate = true;
       }
       else if (arg == "--Bdynamic")
       {
@@ -319,6 +327,7 @@ namespace mold
       else
       {
         read_file(ctx, rctx, must_open_file(ctx, std::string(arg)));
+        reset_isolate();
       }
     }
 

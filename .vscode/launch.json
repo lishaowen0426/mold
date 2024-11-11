@@ -44,6 +44,7 @@
         "--as-needed",
         "-Bstatic",
         "/home/swli/rust-isolation/lib_demo/target-mold/debug/deps/liblib_demo-a15a803e19b1d59f.rlib",
+        "--isolate",
         "/home/swli/rust-isolation/lib_demo/target-mold/debug/deps/lib_demo-a15a803e19b1d59f.16266ixwx20i6oba.rcgu.o",
         "/home/swli/rust-isolation/rust/build/x86_64-unknown-linux-gnu/stage2/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd-67aa0a6fc8745c32.rlib",
         "/home/swli/rust-isolation/rust/build/x86_64-unknown-linux-gnu/stage2/lib/rustlib/x86_64-unknown-linux-gnu/lib/libpanic_unwind-ae1f9254e74b7101.rlib",
