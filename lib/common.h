@@ -28,19 +28,19 @@
 #include <vector>
 
 #ifdef _WIN32
-# include <io.h>
+#include <io.h>
 #else
-# include <sys/mman.h>
-# include <unistd.h>
+#include <sys/mman.h>
+#include <unistd.h>
 #endif
 
 #define XXH_INLINE_ALL 1
 #include "../third-party/xxhash/xxhash.h"
 
 #ifdef NDEBUG
-# define unreachable() __builtin_unreachable()
+#define unreachable() __builtin_unreachable()
 #else
-# define unreachable() assert(0 && "unreachable")
+#define unreachable() assert(0 && "unreachable")
 #endif
 
 inline uint64_t hash_string(std::string_view str) {
@@ -49,9 +49,7 @@ inline uint64_t hash_string(std::string_view str) {
 
 class HashCmp {
 public:
-  static size_t hash(const std::string_view &k) {
-    return hash_string(k);
-  }
+  static size_t hash(const std::string_view &k) { return hash_string(k); }
 
   static bool equal(const std::string_view &k1, const std::string_view &k2) {
     return k1 == k2;
@@ -88,9 +86,7 @@ class SyncStream {
 public:
   SyncStream(std::ostream &out) : out(out) {}
 
-  ~SyncStream() {
-    emit();
-  }
+  ~SyncStream() { emit(); }
 
   template <typename T> SyncStream &operator<<(T &&val) {
     ss << std::forward<T>(val);
@@ -113,8 +109,7 @@ private:
   static inline std::mutex mu;
 };
 
-template <typename Context>
-class Out {
+template <typename Context> class Out {
 public:
   Out(Context &ctx) {}
 
@@ -134,8 +129,7 @@ static std::string_view error_color = "mold: \033[0;1;31merror:\033[0m ";
 static std::string_view warning_mono = "mold: warning: ";
 static std::string_view warning_color = "mold: \033[0;1;35mwarning:\033[0m ";
 
-template <typename Context>
-class Fatal {
+template <typename Context> class Fatal {
 public:
   Fatal(Context &ctx) {
     out << (ctx.arg.color_diagnostics ? fatal_color : fatal_mono);
@@ -156,8 +150,7 @@ private:
   SyncStream out{std::cerr};
 };
 
-template <typename Context>
-class Error {
+template <typename Context> class Error {
 public:
   Error(Context &ctx) {
     if (ctx.arg.noinhibit_exec) {
@@ -177,8 +170,7 @@ private:
   SyncStream out{std::cerr};
 };
 
-template <typename Context>
-class Warn {
+template <typename Context> class Warn {
 public:
   Warn(Context &ctx) {
     if (ctx.arg.suppress_warnings)
@@ -210,8 +202,7 @@ private:
 
 // This is the same as std::atomic except that the default memory
 // order is relaxed instead of sequential consistency.
-template <typename T>
-struct Atomic : std::atomic<T> {
+template <typename T> struct Atomic : std::atomic<T> {
   static constexpr std::memory_order relaxed = std::memory_order_relaxed;
 
   using std::atomic<T>::atomic;
@@ -310,11 +301,10 @@ struct TimerRecord {
   bool stopped = false;
 };
 
-void
-print_timer_records(tbb::concurrent_vector<std::unique_ptr<TimerRecord>> &);
+void print_timer_records(
+    tbb::concurrent_vector<std::unique_ptr<TimerRecord>> &);
 
-template <typename Context>
-class Timer {
+template <typename Context> class Timer {
 public:
   Timer(Context &ctx, std::string name, Timer *parent = nullptr) {
     record = new TimerRecord(name, parent ? parent->record : nullptr);
@@ -323,13 +313,9 @@ public:
 
   Timer(const Timer &) = delete;
 
-  ~Timer() {
-    record->stop();
-  }
+  ~Timer() { record->stop(); }
 
-  void stop() {
-    record->stop();
-  }
+  void stop() { record->stop(); }
 
 private:
   TimerRecord *record;
@@ -357,9 +343,7 @@ private:
 //
 
 // Some C++ libraries haven't implemented std::has_single_bit yet.
-inline bool has_single_bit(u64 val) {
-  return std::popcount(val) == 1;
-}
+inline bool has_single_bit(u64 val) { return std::popcount(val) == 1; }
 
 // Some C++ libraries haven't implemented std::bit_ceil yet.
 inline u64 bit_ceil(u64 val) {
@@ -380,9 +364,7 @@ inline u64 align_down(u64 val, u64 align) {
   return val & ~(align - 1);
 }
 
-inline u64 bit(u64 val, i64 pos) {
-  return (val >> pos) & 1;
-};
+inline u64 bit(u64 val, i64 pos) { return (val >> pos) & 1; };
 
 // Returns [hi:lo] bits of val.
 inline u64 bits(u64 val, u64 hi, u64 lo) {
@@ -398,7 +380,8 @@ void update_minimum(std::atomic<T> &atomic, u64 new_val, Compare cmp = {}) {
   T old_val = atomic.load(std::memory_order_relaxed);
   while (cmp(new_val, old_val) &&
          !atomic.compare_exchange_weak(old_val, new_val,
-                                       std::memory_order_relaxed));
+                                       std::memory_order_relaxed))
+    ;
 }
 
 template <typename T, typename Compare = std::less<T>>
@@ -406,11 +389,11 @@ void update_maximum(std::atomic<T> &atomic, u64 new_val, Compare cmp = {}) {
   T old_val = atomic.load(std::memory_order_relaxed);
   while (cmp(old_val, new_val) &&
          !atomic.compare_exchange_weak(old_val, new_val,
-                                       std::memory_order_relaxed));
+                                       std::memory_order_relaxed))
+    ;
 }
 
-template <typename T>
-inline void append(std::vector<T> &x, const auto &y) {
+template <typename T> inline void append(std::vector<T> &x, const auto &y) {
   x.insert(x.end(), y.begin(), y.end());
 }
 
@@ -427,16 +410,13 @@ inline std::vector<T> flatten(std::vector<std::vector<T>> &vec) {
   return ret;
 }
 
-inline void sort(auto &vec) {
-  std::stable_sort(vec.begin(), vec.end());
-}
+inline void sort(auto &vec) { std::stable_sort(vec.begin(), vec.end()); }
 
 inline void sort(auto &vec, auto less) {
   std::stable_sort(vec.begin(), vec.end(), less);
 }
 
-template <typename T>
-inline void remove_duplicates(std::vector<T> &vec) {
+template <typename T> inline void remove_duplicates(std::vector<T> &vec) {
   vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
 }
 
@@ -551,14 +531,11 @@ static inline void pause() {
 //
 // We've implemented this ourselves because the performance of
 // conrurent hash map is critical for our linker.
-template <typename T>
-class ConcurrentMap {
+template <typename T> class ConcurrentMap {
 public:
   ConcurrentMap() = default;
 
-  ConcurrentMap(i64 nbuckets) {
-    resize(nbuckets);
-  }
+  ConcurrentMap(i64 nbuckets) { resize(nbuckets); }
 
   ~ConcurrentMap() {
     if (entries) {
@@ -693,9 +670,8 @@ public:
 
   std::vector<Entry *> get_sorted_entries_all() {
     std::vector<std::vector<Entry *>> vec(NUM_SHARDS);
-    tbb::parallel_for((i64)0, NUM_SHARDS, [&](i64 i) {
-      vec[i] = get_sorted_entries(i);
-    });
+    tbb::parallel_for((i64)0, NUM_SHARDS,
+                      [&](i64 i) { vec[i] = get_sorted_entries(i); });
     return flatten(vec);
   }
 
@@ -872,8 +848,8 @@ private:
 // run the same command with the same command line arguments.
 class TarWriter {
 public:
-  static std::unique_ptr<TarWriter>
-  open(std::string output_path, std::string basedir);
+  static std::unique_ptr<TarWriter> open(std::string output_path,
+                                         std::string basedir);
 
   ~TarWriter();
   void append(std::string path, std::string_view data);

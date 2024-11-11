@@ -1,9 +1,10 @@
-#include "mold.h"
 #include "../lib/archive-file.h"
+#include "mold.h"
 
 #include <cstring>
 #include <functional>
 #include <iomanip>
+#include <iostream>
 #include <map>
 #include <regex>
 #include <signal.h>
@@ -14,10 +15,10 @@
 #include <unordered_set>
 
 #ifdef _WIN32
-# include <direct.h>
-# define chdir _chdir
+#include <direct.h>
+#define chdir _chdir
 #else
-# include <unistd.h>
+#include <unistd.h>
 #endif
 
 #ifdef MOLD_X86_64
@@ -30,17 +31,18 @@ int main(int argc, char **argv) {
 namespace mold {
 
 template <typename E>
-static void
-check_file_compatibility(Context<E> &ctx, ReaderContext &rctx, MappedFile *mf) {
+static void check_file_compatibility(Context<E> &ctx, ReaderContext &rctx,
+                                     MappedFile *mf) {
   std::string_view target = get_machine_type(ctx, rctx, mf);
   if (target != ctx.arg.emulation)
-    Fatal(ctx) << mf->name << ": incompatible file type: "
-               << ctx.arg.emulation << " is expected but got " << target;
+    Fatal(ctx) << mf->name << ": incompatible file type: " << ctx.arg.emulation
+               << " is expected but got " << target;
 }
 
 template <typename E>
 static ObjectFile<E> *new_object_file(Context<E> &ctx, ReaderContext &rctx,
-                                      MappedFile *mf, std::string archive_name) {
+                                      MappedFile *mf,
+                                      std::string archive_name) {
   static Counter count("parsed_objs");
   count++;
 
@@ -70,7 +72,8 @@ static ObjectFile<E> *new_lto_obj(Context<E> &ctx, ReaderContext &rctx,
   ObjectFile<E> *file = read_lto_object(ctx, mf);
   file->priority = ctx.file_priority++;
   file->archive_name = archive_name;
-  file->is_in_lib = rctx.in_lib || (!archive_name.empty() && !rctx.whole_archive);
+  file->is_in_lib =
+      rctx.in_lib || (!archive_name.empty() && !rctx.whole_archive);
   file->is_alive = !file->is_in_lib;
   if (ctx.arg.trace)
     Out(ctx) << "trace: " << *file;
@@ -78,8 +81,8 @@ static ObjectFile<E> *new_lto_obj(Context<E> &ctx, ReaderContext &rctx,
 }
 
 template <typename E>
-static SharedFile<E> *
-new_shared_file(Context<E> &ctx, ReaderContext &rctx, MappedFile *mf) {
+static SharedFile<E> *new_shared_file(Context<E> &ctx, ReaderContext &rctx,
+                                      MappedFile *mf) {
   check_file_compatibility(ctx, rctx, mf);
 
   SharedFile<E> *file = new SharedFile<E>(ctx, mf);
@@ -137,8 +140,8 @@ void read_file(Context<E> &ctx, ReaderContext &rctx, MappedFile *mf) {
 }
 
 template <typename E>
-static std::string_view
-detect_machine_type(Context<E> &ctx, std::vector<std::string> args) {
+static std::string_view detect_machine_type(Context<E> &ctx,
+                                            std::vector<std::string> args) {
   for (ReaderContext rctx; const std::string &arg : args) {
     if (arg == "--Bstatic") {
       rctx.static_ = true;
@@ -162,7 +165,7 @@ detect_machine_type(Context<E> &ctx, std::vector<std::string> args) {
       if (MappedFile *mf = open_file(ctx, arg))
         if (get_file_type(ctx, mf) == FileType::TEXT)
           if (std::string_view target =
-              Script(ctx, rctx, mf).get_script_output_type();
+                  Script(ctx, rctx, mf).get_script_output_type();
               !target.empty())
             return target;
     }
@@ -172,7 +175,8 @@ detect_machine_type(Context<E> &ctx, std::vector<std::string> args) {
 }
 
 template <typename E>
-MappedFile *open_library(Context<E> &ctx, ReaderContext &rctx, std::string path) {
+MappedFile *open_library(Context<E> &ctx, ReaderContext &rctx,
+                         std::string path) {
   MappedFile *mf = open_file(ctx, path);
   if (!mf)
     return nullptr;
@@ -187,7 +191,8 @@ MappedFile *open_library(Context<E> &ctx, ReaderContext &rctx, std::string path)
 }
 
 template <typename E>
-MappedFile *find_library(Context<E> &ctx, ReaderContext &rctx, std::string name) {
+MappedFile *find_library(Context<E> &ctx, ReaderContext &rctx,
+                         std::string name) {
   if (name.starts_with(':')) {
     for (std::string_view dir : ctx.arg.library_paths) {
       std::string path = std::string(dir) + "/" + name.substr(1);
@@ -266,18 +271,15 @@ static void read_input_files(Context<E> &ctx, std::span<std::string> args) {
   tg.wait();
 }
 
-template <typename E>
-static bool has_lto_obj(Context<E> &ctx) {
+template <typename E> static bool has_lto_obj(Context<E> &ctx) {
   for (ObjectFile<E> *file : ctx.objs)
     if (file->is_alive && (file->is_lto_obj || file->is_gcc_offload_obj))
       return true;
   return false;
 }
 
-template <typename E>
-int mold_main(int argc, char **argv) {
+template <typename E> int mold_main(int argc, char **argv) {
   Context<E> ctx;
-
   // Process -run option first. process_run_subcommand() does not return.
   if (argc >= 2 && (argv[1] == "-run"sv || argv[1] == "--run"sv))
     process_run_subcommand(ctx, argc, argv);
@@ -301,8 +303,8 @@ int mold_main(int argc, char **argv) {
 
   if (!ctx.arg.directory.empty())
     if (chdir(ctx.arg.directory.c_str()) == -1)
-      Fatal(ctx) << "chdir failed: " << ctx.arg.directory
-                 << ": " << errno_string();
+      Fatal(ctx) << "chdir failed: " << ctx.arg.directory << ": "
+                 << errno_string();
 
   // Fork a subprocess unless --no-fork is given.
   if (ctx.arg.fork)
