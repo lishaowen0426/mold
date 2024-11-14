@@ -91,15 +91,14 @@ namespace mold
     i64 num_sections = (ehdr.e_shnum == 0) ? sh_begin->sh_size : ehdr.e_shnum;
 
     if (mf->data + mf->size < (u8 *)(sh_begin + num_sections))
-      Fatal(ctx) << mf->name << ": e_shoff or e_shnum corrupted: "
-                 << mf->size << " " << num_sections;
+      Fatal(ctx) << mf->name << ": e_shoff or e_shnum corrupted: " << mf->size
+                 << " " << num_sections;
     elf_sections = {sh_begin, sh_begin + num_sections};
 
     // e_shstrndx is a 16-bit field. If .shstrtab's section index is
     // too large, the actual number is stored to sh_link field.
-    i64 shstrtab_idx = (ehdr.e_shstrndx == SHN_XINDEX)
-                           ? sh_begin->sh_link
-                           : ehdr.e_shstrndx;
+    i64 shstrtab_idx =
+        (ehdr.e_shstrndx == SHN_XINDEX) ? sh_begin->sh_link : ehdr.e_shstrndx;
 
     shstrtab = this->get_string(ctx, shstrtab_idx);
   }
@@ -139,7 +138,8 @@ namespace mold
   }
   template <typename E>
   ObjectFile<E>::ObjectFile(Context<E> &ctx, MappedFile *mf,
-                            std::string archive_name, bool is_in_lib, bool isolate)
+                            std::string archive_name, bool is_in_lib,
+                            bool isolate)
       : ObjectFile<E>(ctx, mf, archive_name, is_in_lib)
   {
     this->isolate = isolate;
@@ -152,8 +152,8 @@ namespace mold
   }
 
   template <typename E>
-  void
-  ObjectFile<E>::parse_note_gnu_property(Context<E> &ctx, const ElfShdr<E> &shdr)
+  void ObjectFile<E>::parse_note_gnu_property(Context<E> &ctx,
+                                              const ElfShdr<E> &shdr)
   {
     std::string_view data = this->get_string(ctx, shdr);
 
@@ -254,12 +254,8 @@ namespace mold
     u32 ty = shdr.sh_type;
     u32 flags = shdr.sh_flags;
 
-    if (ty == SHT_PROGBITS ||
-        ty == SHT_NOTE ||
-        ty == SHT_NOBITS ||
-        ty == SHT_INIT_ARRAY ||
-        ty == SHT_FINI_ARRAY ||
-        ty == SHT_PREINIT_ARRAY)
+    if (ty == SHT_PROGBITS || ty == SHT_NOTE || ty == SHT_NOBITS ||
+        ty == SHT_INIT_ARRAY || ty == SHT_FINI_ARRAY || ty == SHT_PREINIT_ARRAY)
       return true;
 
     if (SHT_LOUSER <= ty && ty <= SHT_HIUSER && !(flags & SHF_ALLOC))
@@ -320,8 +316,8 @@ namespace mold
         std::string_view signature;
         if (esym.st_type == STT_SECTION)
         {
-          signature = this->shstrtab.data() +
-                      this->elf_sections[get_shndx(esym)].sh_name;
+          signature =
+              this->shstrtab.data() + this->elf_sections[get_shndx(esym)].sh_name;
         }
         else
         {
@@ -370,10 +366,12 @@ namespace mold
           if (shdr.sh_flags & SHF_EXECINSTR)
           {
             if (!ctx.arg.z_execstack && !ctx.arg.z_execstack_if_needed)
-              Warn(ctx) << *this << ": this file may cause a segmentation"
-                                    " fault because it requires an executable stack. See"
-                                    " https://github.com/rui314/mold/tree/main/docs/execstack.md"
-                                    " for more info.";
+              Warn(ctx)
+                  << *this
+                  << ": this file may cause a segmentation"
+                     " fault because it requires an executable stack. See"
+                     " https://github.com/rui314/mold/tree/main/docs/execstack.md"
+                     " for more info.";
             needs_executable_stack = true;
           }
           continue;
@@ -429,13 +427,12 @@ namespace mold
           continue;
         }
 
-        if (shdr.sh_type == SHT_INIT_ARRAY ||
-            shdr.sh_type == SHT_FINI_ARRAY ||
+        if (shdr.sh_type == SHT_INIT_ARRAY || shdr.sh_type == SHT_FINI_ARRAY ||
             shdr.sh_type == SHT_PREINIT_ARRAY)
           this->has_init_array = true;
 
-        if (name == ".ctors" || name.starts_with(".ctors.") ||
-            name == ".dtors" || name.starts_with(".dtors."))
+        if (name == ".ctors" || name.starts_with(".ctors.") || name == ".dtors" ||
+            name.starts_with(".dtors."))
           this->has_ctors = true;
 
         if (name == ".eh_frame")
@@ -474,9 +471,10 @@ namespace mold
           // (-fdebug-types-section is needed). As such there is probably
           // little need to support it.
           if (name == ".debug_types")
-            Fatal(ctx) << *this << ": mold's --gdb-index is not compatible"
-                                   " with .debug_types; to fix this error, remove"
-                                   " -fdebug-types-section and recompile";
+            Fatal(ctx) << *this
+                       << ": mold's --gdb-index is not compatible"
+                          " with .debug_types; to fix this error, remove"
+                          " -fdebug-types-section and recompile";
         }
 
         static Counter counter("regular_sections");
@@ -493,8 +491,8 @@ namespace mold
         continue;
 
       if (shdr.sh_info >= sections.size())
-        Fatal(ctx) << *this << ": invalid relocated section index: "
-                   << (u32)shdr.sh_info;
+        Fatal(ctx) << *this
+                   << ": invalid relocated section index: " << (u32)shdr.sh_info;
 
       if (std::unique_ptr<InputSection<E>> &target = sections[shdr.sh_info])
       {
@@ -560,7 +558,8 @@ namespace mold
         i64 rel_begin = rel_idx;
         while (rel_idx < rels.size() && rels[rel_idx].r_offset < end_offset)
           rel_idx++;
-        assert(rel_idx == rels.size() || begin_offset <= rels[rel_begin].r_offset);
+        assert(rel_idx == rels.size() ||
+               begin_offset <= rels[rel_begin].r_offset);
 
         if (id == 0)
         {
@@ -579,7 +578,8 @@ namespace mold
           }
 
           if (rels[rel_begin].r_offset - begin_offset != 8)
-            Fatal(ctx) << *isec << ": FDE's first relocation should have offset 8";
+            Fatal(ctx) << *isec
+                       << ": FDE's first relocation should have offset 8";
 
           fdes.emplace_back(begin_offset, rel_begin);
         }
@@ -653,7 +653,8 @@ namespace mold
 
       std::string_view name;
       if (esym.st_type == STT_SECTION)
-        name = this->shstrtab.data() + this->elf_sections[get_shndx(esym)].sh_name;
+        name =
+            this->shstrtab.data() + this->elf_sections[get_shndx(esym)].sh_name;
       else
         name = this->symbol_strtab.data() + esym.st_name;
 
@@ -768,8 +769,8 @@ namespace mold
 
       if (parent)
       {
-        this->mergeable_sections[i] =
-            std::make_unique<MergeableSection<E>>(ctx, *parent, this->sections[i]);
+        this->mergeable_sections[i] = std::make_unique<MergeableSection<E>>(
+            ctx, *parent, this->sections[i]);
         this->sections[i] = nullptr;
       }
     }
@@ -884,7 +885,8 @@ namespace mold
           i64 r_addend = get_addend(*isec, r);
           SectionFragment<E> *frag;
           i64 in_frag_offset;
-          std::tie(frag, in_frag_offset) = m->get_fragment(esym.st_value + r_addend);
+          std::tie(frag, in_frag_offset) =
+              m->get_fragment(esym.st_value + r_addend);
 
           if (!frag)
             Fatal(ctx) << *this << ": bad relocation at " << r.r_sym;
@@ -929,6 +931,7 @@ namespace mold
     }
 
     initialize_sections(ctx);
+
     initialize_symbols(ctx);
     sort_relocations(ctx);
 
@@ -956,7 +959,8 @@ namespace mold
   //
   // Ties are broken by file priority.
   template <typename E>
-  static u64 get_rank(InputFile<E> *file, const ElfSym<E> &esym, bool is_in_archive)
+  static u64 get_rank(InputFile<E> *file, const ElfSym<E> &esym,
+                      bool is_in_archive)
   {
     auto get_sym_rank = [&]
     {
@@ -1012,7 +1016,8 @@ namespace mold
       Fatal(ctx) << *this << ": unknown symbol visibility: " << sym;
     };
 
-    update_minimum(sym.visibility, visibility, [&](u8 a, u8 b)
+    update_minimum(sym.visibility, visibility,
+                   [&](u8 a, u8 b)
                    { return priority(a) < priority(b); });
   }
 
@@ -1031,6 +1036,7 @@ namespace mold
   template <typename E>
   void ObjectFile<E>::resolve_symbols(Context<E> &ctx)
   {
+
     for (i64 i = this->first_global; i < this->elf_syms.size(); i++)
     {
       Symbol<E> &sym = *this->symbols[i];
@@ -1061,9 +1067,8 @@ namespace mold
   }
 
   template <typename E>
-  void
-  ObjectFile<E>::mark_live_objects(Context<E> &ctx,
-                                   std::function<void(InputFile<E> *)> feeder)
+  void ObjectFile<E>::mark_live_objects(
+      Context<E> &ctx, std::function<void(InputFile<E> *)> feeder)
   {
     assert(this->is_alive);
 
@@ -1228,7 +1233,8 @@ namespace mold
     };
 
     // Compute the size of local symbols
-    if (!ctx.arg.discard_all && !ctx.arg.strip_all && !ctx.arg.retain_symbols_file)
+    if (!ctx.arg.discard_all && !ctx.arg.strip_all &&
+        !ctx.arg.retain_symbols_file)
     {
       for (i64 i = 1; i < this->first_global; i++)
       {
@@ -1339,7 +1345,8 @@ namespace mold
     version_strings = read_verdef(ctx);
 
     // Read a symbol table.
-    std::span<ElfSym<E>> esyms = this->template get_data<ElfSym<E>>(ctx, *symtab_sec);
+    std::span<ElfSym<E>> esyms =
+        this->template get_data<ElfSym<E>>(ctx, *symtab_sec);
 
     std::span<U16<E>> vers;
     if (ElfShdr<E> *sec = this->find_section(SHT_GNU_VERSYM))
@@ -1495,9 +1502,8 @@ namespace mold
   }
 
   template <typename E>
-  void
-  SharedFile<E>::mark_live_objects(Context<E> &ctx,
-                                   std::function<void(InputFile<E> *)> feeder)
+  void SharedFile<E>::mark_live_objects(
+      Context<E> &ctx, std::function<void(InputFile<E> *)> feeder)
   {
     for (i64 i = 0; i < this->elf_syms.size(); i++)
     {
@@ -1530,16 +1536,19 @@ namespace mold
       if (sym->file == this)
         sorted_syms.push_back(sym);
 
-    tbb::parallel_sort(sorted_syms.begin(), sorted_syms.end(),
-                       [](Symbol<E> *a, Symbol<E> *b) {
-      const ElfSym<E> &x = a->esym();
-      const ElfSym<E> &y = b->esym();
-      return std::tuple{x.st_value, &x} < std::tuple{y.st_value, &y};
-    }); });
+    tbb::parallel_sort(
+        sorted_syms.begin(), sorted_syms.end(), [](Symbol<E> *a, Symbol<E> *b) {
+          const ElfSym<E> &x = a->esym();
+          const ElfSym<E> &y = b->esym();
+          return std::tuple{x.st_value, &x} < std::tuple{y.st_value, &y};
+        }); });
 
-    auto [begin, end] = std::equal_range(sorted_syms.begin(), sorted_syms.end(),
-                                         sym, [&](Symbol<E> *a, Symbol<E> *b)
-                                         { return a->esym().st_value < b->esym().st_value; });
+    auto [begin, end] =
+        std::equal_range(sorted_syms.begin(), sorted_syms.end(), sym,
+                         [&](Symbol<E> *a, Symbol<E> *b)
+                         {
+                           return a->esym().st_value < b->esym().st_value;
+                         });
 
     return {&*begin, (size_t)(end - begin)};
   }
@@ -1568,8 +1577,8 @@ namespace mold
 
     for (ElfPhdr<E> &phdr : this->get_phdrs())
       if ((phdr.p_type == PT_LOAD || phdr.p_type == PT_GNU_RELRO) &&
-          !(phdr.p_flags & PF_W) &&
-          phdr.p_vaddr <= val && val < phdr.p_vaddr + phdr.p_memsz)
+          !(phdr.p_flags & PF_W) && phdr.p_vaddr <= val &&
+          val < phdr.p_vaddr + phdr.p_memsz)
         return true;
     return false;
   }
@@ -1597,8 +1606,8 @@ namespace mold
   template <typename E>
   void SharedFile<E>::populate_symtab(Context<E> &ctx)
   {
-    ElfSym<E> *symtab =
-        (ElfSym<E> *)(ctx.buf + ctx.symtab->shdr.sh_offset) + this->global_symtab_idx;
+    ElfSym<E> *symtab = (ElfSym<E> *)(ctx.buf + ctx.symtab->shdr.sh_offset) +
+                        this->global_symtab_idx;
 
     u8 *strtab = ctx.buf + ctx.strtab->shdr.sh_offset;
     i64 strtab_off = this->strtab_offset;
@@ -1624,7 +1633,8 @@ namespace mold
   template class InputFile<E>;
   template class ObjectFile<E>;
   template class SharedFile<E>;
-  template Symbol<E> *get_symbol(Context<E> &, std::string_view, std::string_view);
+  template Symbol<E> *get_symbol(Context<E> &, std::string_view,
+                                 std::string_view);
   template Symbol<E> *get_symbol(Context<E> &, std::string_view);
   template std::string_view demangle(const Symbol<E> &);
   template std::ostream &operator<<(std::ostream &, const Symbol<E> &);

@@ -309,6 +309,8 @@ namespace mold
     bool icf_removed() const;
     bool record_undef_error(Context<E> &ctx, const ElfRel<E> &rel);
 
+    bool from_isolate_file() const;
+
     std::pair<SectionFragment<E> *, i64> get_fragment(Context<E> &ctx,
                                                       const ElfRel<E> &rel);
 
@@ -2309,6 +2311,9 @@ namespace mold
     std::vector<ObjectFile<E> *> objs;
     std::vector<SharedFile<E> *> dsos;
 
+    // Object files that need to be isolated
+    std::vector<ObjectFile<E> *> isolates;
+
     ObjectFile<E> *internal_obj = nullptr;
     std::vector<ElfSym<E>> internal_esyms;
 
@@ -2759,6 +2764,11 @@ namespace mold
   inline u64 InputSection<E>::get_addr() const
   {
     return output_section->shdr.sh_addr + offset;
+  }
+  template <typename E>
+  inline bool InputSection<E>::from_isolate_file() const
+  {
+    return file.isolate;
   }
 
   template <typename E>

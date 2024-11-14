@@ -6,6 +6,8 @@
       "request": "launch",
       "program": "${workspaceFolder}/build/mold",
       "args": [
+        "--threads=1",
+        "--no-fork",
         "-pie",
         "-z",
         "relro",
@@ -33,7 +35,7 @@
         "-L/usr/lib/llvm-14/bin/../lib",
         "-L/lib",
         "-L/usr/lib",
-        "/home/swli/rust-isolation/lib_demo/tmp/rustcc7wWv9/symbols.o",
+        "/home/swli/rust-isolation/lib_demo/tmp/rustc479ndx/symbols.o",
         "/home/swli/rust-isolation/lib_demo/target/debug/deps/lib_demo-673f165d7ef6c3e4.1powhy7k07zh7ifc.rcgu.o",
         "/home/swli/rust-isolation/lib_demo/target/debug/deps/lib_demo-673f165d7ef6c3e4.356pudswjuq969i2.rcgu.o",
         "/home/swli/rust-isolation/lib_demo/target/debug/deps/lib_demo-673f165d7ef6c3e4.3swdcm0ry9sz476u.rcgu.o",
