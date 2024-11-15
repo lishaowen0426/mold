@@ -496,9 +496,10 @@ template <typename E> struct AbsRel {
 // Sections
 template <typename E> class OutputSection : public Chunk<E> {
 public:
-  OutputSection(std::string_view name, u32 type) {
+  OutputSection(std::string_view name, u32 type, bool isolate) {
     this->name = name;
     this->shdr.sh_type = type;
+    this->isolate = isolate;
   }
 
   OutputSection<E> *to_osec() override { return this; }
@@ -519,6 +520,8 @@ public:
   std::unique_ptr<RelocSection<E>> reloc_sec;
   std::vector<AbsRel<E>> abs_rels;
   Atomic<u32> sh_flags;
+
+  bool isolate = false;
 };
 
 template <typename E> class GotSection : public Chunk<E> {

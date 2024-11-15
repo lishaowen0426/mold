@@ -606,8 +606,8 @@ template <typename E> void create_output_sections(Context<E> &ctx) {
                      ~SHF_COMPRESSED & ~SHF_GNU_RETAIN;
 
       if (ctx.arg.relocatable && (sh_flags & SHF_GROUP)) {
-        OutputSection<E> *osec =
-            new OutputSection<E>(isec->name(), shdr.sh_type);
+        OutputSection<E> *osec = new OutputSection<E>(
+            isec->name(), shdr.sh_type, isec->from_isolate_file());
         osec->sh_flags = sh_flags;
         isec->output_section = osec;
         ctx.osec_pool.emplace_back(osec);
@@ -630,7 +630,8 @@ template <typename E> void create_output_sections(Context<E> &ctx) {
         }
 
         std::unique_ptr<OutputSection<E>> osec =
-            std::make_unique<OutputSection<E>>(key.name, key.type);
+            std::make_unique<OutputSection<E>>(key.name, key.type,
+                                               isec->from_isolate_file());
 
         std::unique_lock lock(mu);
         auto [it, inserted] = map.insert({key, osec.get()});
@@ -3051,7 +3052,7 @@ template <typename E> void write_separate_debug_file(Context<E> &ctx) {
     Chunk<E> *chunk = ctx.chunks[i];
     if (chunk != ctx.ehdr && chunk != ctx.shdr && chunk != ctx.shstrtab &&
         chunk->shdr.sh_type != SHT_NOTE) {
-      Chunk<E> *sec = new OutputSection<E>(chunk->name, SHT_NULL);
+      Chunk<E> *sec = new OutputSection<E>(chunk->name, SHT_NULL, false);
       sec->shdr = chunk->shdr;
       sec->shdr.sh_type = SHT_NOBITS;
 
