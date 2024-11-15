@@ -7,7 +7,9 @@
     "CMAKE_INSTALL_PREFIX": "${workspaceFolder}/build/install",
     "CMAKE_EXPORT_COMPILE_COMMANDS": 1
   },
-  "cmake.buildArgs": ["-j8"],
+  "cmake.buildArgs": [
+    "-j8"
+  ],
   "search.exclude": {
     "**/node_modules": true,
     "**/bower_components": true,
@@ -18,10 +20,10 @@
   },
   "files.associations": {
     "*.css": "tailwindcss",
+    "*.s": "asm-intel-x86-generic",
     "*.scss": "tailwindcss",
     "*.cshtml": "html",
     "justfile": "ignore",
-    "*.s": "asm-intel-x86-generic",
     "format": "cpp",
     "string_view": "cpp",
     "type_traits": "cpp",
@@ -96,6 +98,8 @@
     "cinttypes": "cpp",
     "variant": "cpp",
     "complex": "cpp",
-    "source_location": "cpp"
+    "source_location": "cpp",
+    "any": "cpp",
+    "ranges": "cpp"
   }
 }

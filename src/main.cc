@@ -450,6 +450,9 @@ template <typename E> int mold_main(int argc, char **argv) {
   if (!ctx.arg.section_align.empty())
     apply_section_align(ctx);
 
+  // align isolate sections
+  apply_isolate_section_align(ctx);
+
   // Add synthetic symbols such as __ehdr_start or __end.
   add_synthetic_symbols(ctx);
 

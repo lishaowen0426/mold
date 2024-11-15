@@ -405,6 +405,8 @@ public:
   // for such synthesizing symbols.
   virtual void compute_symtab_size(Context<E> &ctx){};
   virtual void populate_symtab(Context<E> &ctx){};
+  bool isolate = false;
+  bool is_isolate() { return this->isolate; };
 
   i64 local_symtab_idx = 0;
   i64 num_local_symtab = 0;
@@ -520,8 +522,6 @@ public:
   std::unique_ptr<RelocSection<E>> reloc_sec;
   std::vector<AbsRel<E>> abs_rels;
   Atomic<u32> sh_flags;
-
-  bool isolate = false;
 };
 
 template <typename E> class GotSection : public Chunk<E> {
@@ -1554,6 +1554,7 @@ template <typename E> void convert_common_symbols(Context<E> &);
 template <typename E> void create_output_sections(Context<E> &);
 template <typename E> void add_synthetic_symbols(Context<E> &);
 template <typename E> void apply_section_align(Context<E> &);
+template <typename E> void apply_isolate_section_align(Context<E> &);
 template <typename E> void check_cet_errors(Context<E> &);
 template <typename E> void print_dependencies(Context<E> &);
 template <typename E> void write_repro_file(Context<E> &);

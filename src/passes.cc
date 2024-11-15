@@ -899,6 +899,18 @@ template <typename E> void apply_section_align(Context<E> &ctx) {
         osec->shdr.sh_addralign = it->second;
 }
 
+template <typename E> void apply_isolate_section_align(Context<E> &ctx) {
+  for (Chunk<E> *chunk : ctx.chunks)
+    if (OutputSection<E> *osec = chunk->to_osec()) {
+      if (osec->is_isolate()) {
+        // 0 and 1 means no alignment
+        //  positive power of 2 means aligned
+        assert(ctx.page_size == (1 << 12));
+        osec->shdr.sh_addralign = ctx.page_size;
+      }
+    }
+}
+
 template <typename E> void check_cet_errors(Context<E> &ctx) {
   bool warning = (ctx.arg.z_cet_report == CET_REPORT_WARNING);
   assert(warning || ctx.arg.z_cet_report == CET_REPORT_ERROR);
@@ -1339,6 +1351,8 @@ template <typename E> void compute_section_sizes(Context<E> &ctx) {
   Timer t(ctx, "compute_section_sizes");
 
   if constexpr (needs_thunk<E>) {
+    SPDLOG_ERROR("needs_thunk not implemented");
+    exit(1);
     // We cannot use parallel-for for compute_section_size() which may
     // call create_range_extension_thunks() because that function is
     // not thread-safe.
@@ -2448,6 +2462,10 @@ static void set_virtual_addresses_regular(Context<E> &ctx) {
 
     addr = align_to(addr, alignment(chunks[i]));
     chunks[i]->shdr.sh_addr = addr;
+    if (chunks[i]->is_isolate()) {
+      SPDLOG_DEBUG("isolate chunk {} addr:{:#x},align:{:#x}", chunks[i]->name,
+                   addr, alignment(chunks[i]));
+    }
     addr += chunks[i]->shdr.sh_size;
   }
 }
@@ -3204,6 +3222,7 @@ template void create_output_sections(Context<E> &);
 template void add_synthetic_symbols(Context<E> &);
 template void check_cet_errors(Context<E> &);
 template void apply_section_align(Context<E> &);
+template void apply_isolate_section_align(Context<E> &);
 template void print_dependencies(Context<E> &);
 template void write_repro_file(Context<E> &);
 template void check_duplicate_symbols(Context<E> &);
