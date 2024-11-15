@@ -428,6 +428,7 @@ target_compile_options(mold PRIVATE -fexceptions)
 
 
 
+
 include(CTest)
 
 if(BUILD_TESTING)
